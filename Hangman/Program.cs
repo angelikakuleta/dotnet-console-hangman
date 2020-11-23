@@ -4,20 +4,14 @@ namespace Hangman
 {
     class Program
     {
-        static Player player;
         const int LifePoints = 5;
 
         static void Main(string[] args)
         {
-            StartGame();
-        }
-
-        static void StartGame()
-        {
-            Console.WriteLine("Satrting game...");
             string playerName = AskForPlayerName();
-            player = new Player(playerName, LifePoints);
-            Console.WriteLine($"Hello {player.Name}! Let's start");
+            Player player = new Player(playerName, LifePoints);
+            Console.WriteLine("Satrting the game...");
+            new Game(player).StartGame();
         }
 
         static string AskForPlayerName()
