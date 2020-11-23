@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text;
+using ConsoleTables;
 
 namespace Hangman
 {
@@ -209,12 +211,65 @@ namespace Hangman
             return letter;
         }
 
+        List<string[]> SaveScore()
+        {
+            Console.WriteLine("Saving your score...");
+            int guessingTime = (int)(this.EndTime - this.StartTime).TotalSeconds;
+            string[] playerScore = {
+                this.player.Name, 
+                this.EndTime.ToString("dd.MM.yyyy H:mm"), 
+                guessingTime.ToString(), 
+                this.player.GuessedLetters.Count.ToString(), 
+                this.GetGuessedLetters()
+            };
+
+            string pathToScores = AppDomain.CurrentDomain.BaseDirectory + @"/data/scores.txt";
+            var scoresList = new List<string[]>();
+
+            if (File.Exists(pathToScores)) 
+            {
+                var scores = File.ReadAllLines(pathToScores);
+                scoresList = scores.Select(x => x.Split(" | ")).ToList();
+            }
+            
+            scoresList.Add(playerScore);
+            if (scoresList.Count > 1)
+                scoresList.Sort((x, y) => int.Parse(x[2]).CompareTo(int.Parse(y[2])));
+            if (scoresList.Count > 10)
+                scoresList.RemoveRange(10, scoresList.Count-10);
+            
+            StringBuilder fileContet = new StringBuilder();
+            for (int i = 0; i < scoresList.Count; i++)
+            {
+                fileContet.Append(String.Join(" | ", scoresList[i]));
+                if (i != scoresList.Count - 1)
+                    fileContet.Append(Environment.NewLine);
+            }
+        
+            File.WriteAllText(pathToScores, fileContet.ToString());
+            return scoresList;
+        }
+
+        static void DrawLeaderboard(List<string[]> scores)
+        {
+            var table = new ConsoleTable("name", "date", "guessing time", "guessing_tries", "guessed_word");
+            foreach (var x in scores)
+            {
+                table.AddRow(x[0], x[1], x[2], x[3], x[4]);
+            }
+            table.Write(Format.Minimal);
+        }
+
         void DisplayResult()
         {
             if (this.player.Winner) {
                 Console.WriteLine("Congrats!");
                 int guessingTime = (int)(this.EndTime - this.StartTime).TotalSeconds;
                 Console.WriteLine($"You guessed the capital after {this.player.GuessedLetters.Count} letters. It took you {guessingTime} seconds.");
+                Console.WriteLine();
+                var scoreList = SaveScore();
+                Console.WriteLine();
+                DrawLeaderboard(scoreList);
             }
             else {
                 Console.WriteLine("You failed...");
