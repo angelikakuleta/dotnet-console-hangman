@@ -74,11 +74,14 @@ namespace Hangman
             this.EndTime = DateTime.Now;
 
             this.player.CheckIfHasWon(capital);
+
+            this.DisplayGameState();
+            this.DisplayResult();
         }
 
         (string, string) GetRandomPair()
         {
-            string pathToWords = AppDomain.CurrentDomain.BaseDirectory + @"/data/countries_and_capitals.txt";
+            string pathToWords = AppDomain.CurrentDomain.BaseDirectory + @"/data/countries_and_capitalss.txt";
             string[] countryCapitalPairs;
             try
             {
@@ -204,6 +207,18 @@ namespace Hangman
                 this.player.GuessedLetters.Add(letter);
             
             return letter;
+        }
+
+        void DisplayResult()
+        {
+            if (this.player.Winner) {
+                Console.WriteLine("Congrats!");
+                int guessingTime = (int)(this.EndTime - this.StartTime).TotalSeconds;
+                Console.WriteLine($"You guessed the capital after {this.player.GuessedLetters.Count} letters. It took you {guessingTime} seconds.");
+            }
+            else {
+                Console.WriteLine("You failed...");
+            }
         }
     }
 }
